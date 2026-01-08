@@ -292,21 +292,6 @@ This project was built for AI for Bharat's Week 6 challenge: "The Referee - Buil
 - ✅ Interactive web interface with comparison tools
 - ✅ Comprehensive API with multiple comparison types
 - ✅ Real-world usage examples and documentation
-
-## 🔗 Links
-
-- **Live Demo**: [Coming Soon]
-- **Blog Post**: [AWS Builder Center Article]
-- **Documentation**: [API Docs](http://localhost:3000)
-
-## 📞 Support
-
-If you have questions or need help:
-1. Check the [API documentation](http://localhost:3000) 
-2. Review the [example requests](http://localhost:3000/api/examples/apis)
-3. Run the test suite to verify your setup
-4. Open an issue on GitHub
-
 ---
 
 *Built with ❤️ and accelerated by Kiro AI for AI for Bharat Week 6 Challenge*
