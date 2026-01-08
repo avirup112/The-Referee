@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Referee - Smart Decision Tool</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="90" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="1" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .comparison-tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .tool-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-xl);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .tool-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .tool-card h3 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tool-card h3::before {
+            font-size: 2rem;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .tool-card p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .tool-card ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .tool-card li {
+            padding: 8px 0;
+            color: var(--text-primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tool-card li::before {
+            content: "✨";
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .demo-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .demo-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .demo-form {
+            display: grid;
+            gap: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: var(--bg-white);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .results {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h3 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .comparison-result {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-result:hover {
+            transform: translateX(5px);
+        }
+
+        .comparison-result h4 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .score {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .pros, .cons {
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .pros {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .cons {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .pros h5, .cons h5 {
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .pros h5 {
+            color: var(--success-color);
+        }
+
+        .cons h5 {
+            color: var(--danger-color);
+        }
+
+        .pros ul, .cons ul {
+            list-style: none;
+        }
+
+        .pros li, .cons li {
+            padding: 6px 0;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .pros li::before {
+            content: "✅";
+            flex-shrink: 0;
+        }
+
+        .cons li::before {
+            content: "⚠️";
+            flex-shrink: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary-color);
+        }
+
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading p {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .comparison-tools {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .pros-cons {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tool-card, .demo-section {
+                padding: 25px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .tool-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .demo-section h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 The Referee</h1>
+            <p>Smart comparison tool for making informed technical decisions with detailed trade-off analysis</p>
+        </div>
+
+        <div class="comparison-tools">
+            <div class="tool-card">
+                <h3>🔌 API Comparison</h3>
+                <p>Compare different APIs with real-time performance testing, cost analysis, and comprehensive feature evaluation</p>
+                <ul>
+                    <li>Real-time performance testing & health checks</li>
+                    <li>Detailed cost analysis & rate limit evaluation</li>
+                    <li>Feature comparison (REST vs GraphQL vs gRPC)</li>
+                    <li>Integration complexity assessment</li>
+                    <li>Trade-off analysis with pros & cons</li>
+                </ul>
+                <button class="btn" onclick="showDemo('api')">
+                    <span>Try API Comparison</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <div class="tool-card">
+                <h3>☁️ Cloud Services</h3>
+                <p>Evaluate cloud providers with multi-dimensional analysis including cost optimization and vendor lock-in assessment</p>
+                <ul>
+                    <li>Multi-provider cost optimization analysis</li>
+                    <li>Performance benchmarks & scalability review</li>
+                    <li>Vendor lock-in risk assessment</li>
+                    <li>Compliance requirement checking</li>
+                    <li>Migration complexity evaluation</li>
+                </ul>
+                <button class="btn" onclick="showDemo('cloud')">
+                    <span>Compare Cloud Services</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <div class="tool-card">
+                <h3>🛠️ Tech Stack Advisor</h3>
+                <p>Get personalized technology stack recommendations based on your project requirements, team, and constraints</p>
+                <ul>
+                    <li>Project-specific technology matching</li>
+                    <li>Team experience & learning curve analysis</li>
+                    <li>Timeline & budget considerations</li>
+                    <li>Job market insights & hiring difficulty</li>
+                    <li>Complete implementation roadmap</li>
+                </ul>
+                <button class="btn" onclick="showDemo('techstack')">
+                    <span>Get Recommendations</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- API Comparison Demo -->
+        <div id="api-demo" class="demo-section" style="display: none;">
+            <h2>🔌 API Comparison Tool</h2>
+            <div class="demo-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First API Name</label>
+                        <input type="text" id="api1-name" value="JSONPlaceholder API" placeholder="Enter API name">
+                    </div>
+                    <div class="form-group">
+                        <label>First API Endpoint</label>
+                        <input type="url" id="api1-endpoint" value="https://jsonplaceholder.typicode.com/posts" placeholder="https://api.example.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Second API Name</label>
+                        <input type="text" id="api2-name" value="GitHub GraphQL API" placeholder="Enter API name">
+                    </div>
+                    <div class="form-group">
+                        <label>Second API Endpoint</label>
+                        <input type="url" id="api2-endpoint" value="https://api.github.com/graphql" placeholder="https://api.example.com">
+                    </div>
+                </div>
+                <button class="btn" onclick="compareAPIs()">
+                    <span>🚀 Compare APIs</span>
+                </button>
+            </div>
+            <div id="api-results" class="results"></div>
+        </div>
+
+        <!-- Cloud Comparison Demo -->
+        <div id="cloud-demo" class="demo-section" style="display: none;">
+            <h2>☁️ Cloud Service Comparison</h2>
+            <div class="demo-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Service Type</label>
+                        <select id="service-type">
+                            <option value="compute">💻 Compute (Virtual Machines)</option>
+                            <option value="storage">💾 Storage Services</option>
+                            <option value="database">🗄️ Database Services</option>
+                            <option value="networking">🌐 Networking Services</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Monthly Usage (hours)</label>
+                        <input type="number" id="usage-hours" value="100" min="1" max="1000" placeholder="100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Maximum Monthly Budget ($)</label>
+                        <input type="number" id="max-budget" value="200" min="10" max="10000" placeholder="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority Focus</label>
+                        <select id="priority-focus">
+                            <option value="cost">💰 Cost Optimization</option>
+                            <option value="performance">⚡ Performance</option>
+                            <option value="reliability">🛡️ Reliability</option>
+                            <option value="scalability">📈 Scalability</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="compareCloud()">
+                    <span>☁️ Compare Cloud Services</span>
+                </button>
+            </div>
+            <div id="cloud-results" class="results"></div>
+        </div>
+
+        <!-- Tech Stack Demo -->
+        <div id="techstack-demo" class="demo-section" style="display: none;">
+            <h2>🛠️ Tech Stack Recommendation</h2>
+            <div class="demo-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Project Type</label>
+                        <select id="project-type">
+                            <option value="web_app">🌐 Web Application</option>
+                            <option value="api">🔌 API/Backend Service</option>
+                            <option value="enterprise">🏢 Enterprise Application</option>
+                            <option value="mobile">📱 Mobile Application</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Team Experience Level</label>
+                        <select id="team-experience">
+                            <option value="beginner">🌱 Beginner (0-2 years)</option>
+                            <option value="intermediate">🚀 Intermediate (2-5 years)</option>
+                            <option value="advanced">⭐ Advanced (5+ years)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Project Timeline</label>
+                        <select id="timeline">
+                            <option value="urgent">⚡ Urgent (< 3 months)</option>
+                            <option value="normal">📅 Normal (3-6 months)</option>
+                            <option value="flexible">🕐 Flexible (> 6 months)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Team Size</label>
+                        <input type="number" id="team-size" value="4" min="1" max="20" placeholder="4">
+                    </div>
+                </div>
+                <button class="btn" onclick="recommendTechStack()">
+                    <span>🎯 Get Recommendation</span>
+                </button>
+            </div>
+            <div id="techstack-results" class="results"></div>
+        </div>
+
+        <div class="footer">
+            <p>🏆 Built with ❤️ for AI for Bharat Week 6 Challenge</p>
+            <p>⚡ Accelerated development with Kiro AI • 🚀 Smart decisions through trade-off analysis</p>
+            <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">
+                <span>🔗 <a href="https://github.com/your-username/the-referee" style="color: white; text-decoration: none;">GitHub Repository</a></span>
+                <span style="margin: 0 15px;">•</span>
+                <span>📝 <a href="#" style="color: white; text-decoration: none;">Technical Blog Post</a></span>
+                <span style="margin: 0 15px;">•</span>
+                <span>🤖 Powered by Kiro AI</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDemo(type) {
+            // Hide all demos
+            document.querySelectorAll('.demo-section').forEach(demo => {
+                demo.style.display = 'none';
+            });
+            
+            // Show selected demo
+            document.getElementById(type + '-demo').style.display = 'block';
+            
+            // Scroll to demo
+            document.getElementById(type + '-demo').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        function showLoading(containerId) {
+            const container = document.getElementById(containerId);
+            const loadingMessages = [
+                "🔍 Analyzing API endpoints and performance metrics...",
+                "⚡ Running real-time health checks and response tests...",
+                "📊 Calculating weighted scores across multiple criteria...",
+                "🎯 Identifying trade-offs and generating recommendations...",
+                "✨ Preparing detailed comparison results..."
+            ];
+            
+            const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+            
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>${randomMessage}</p>
+                    <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.7;">
+                        This may take a few seconds as we perform real-time analysis
+                    </div>
+                </div>
+            `;
+            container.classList.add('show');
+        }
+
+        async function compareAPIs() {
+            showLoading('api-results');
+            
+            const apis = [
+                {
+                    name: document.getElementById('api1-name').value,
+                    endpoint: document.getElementById('api1-endpoint').value
+                },
+                {
+                    name: document.getElementById('api2-name').value,
+                    endpoint: document.getElementById('api2-endpoint').value
+                }
+            ];
+
+            try {
+                const response = await fetch('/api/compare/apis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apis })
+                });
+
+                const result = await response.json();
+                displayAPIResults(result);
+            } catch (error) {
+                displayError('api-results', error.message);
+            }
+        }
+
+        async function compareCloud() {
+            showLoading('cloud-results');
+            
+            const services = [
+                {
+                    name: 'AWS EC2',
+                    provider: 'AWS',
+                    type: document.getElementById('service-type').value,
+                    estimatedUsage: parseInt(document.getElementById('usage-hours').value)
+                },
+                {
+                    name: 'Azure VM',
+                    provider: 'Azure',
+                    type: document.getElementById('service-type').value,
+                    estimatedUsage: parseInt(document.getElementById('usage-hours').value)
+                },
+                {
+                    name: 'Google Compute Engine',
+                    provider: 'GCP',
+                    type: document.getElementById('service-type').value,
+                    estimatedUsage: parseInt(document.getElementById('usage-hours').value)
+                }
+            ];
+
+            const options = {
+                constraints: {
+                    maxMonthlyCost: parseInt(document.getElementById('max-budget').value)
+                }
+            };
+
+            try {
+                const response = await fetch('/api/compare/cloud', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ services, options })
+                });
+
+                const result = await response.json();
+                displayCloudResults(result);
+            } catch (error) {
+                displayError('cloud-results', error.message);
+            }
+        }
+
+        async function recommendTechStack() {
+            showLoading('techstack-results');
+            
+            const requirements = {
+                projectType: document.getElementById('project-type').value,
+                teamExperience: document.getElementById('team-experience').value,
+                timeline: document.getElementById('timeline').value,
+                teamSize: parseInt(document.getElementById('team-size').value)
+            };
+
+            try {
+                const response = await fetch('/api/recommend/tech-stack', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requirements)
+                });
+
+                const result = await response.json();
+                displayTechStackResults(result);
+            } catch (error) {
+                displayError('techstack-results', error.message);
+            }
+        }
+
+        function displayAPIResults(result) {
+            const container = document.getElementById('api-results');
+            let html = '<h3>🏆 API Comparison Results</h3>';
+            
+            if (result.recommendation.choice) {
+                html += `
+                    <div class="comparison-result">
+                        <h4>🥇 Recommended: ${result.recommendation.choice.name}</h4>
+                        <p class="score">Score: ${result.recommendation.choice.totalScore.toFixed(2)}/10</p>
+                        <p><strong>Reason:</strong> ${result.recommendation.reason}</p>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h5>✅ Pros:</h5>
+                                <ul>
+                                    ${result.recommendation.choice.pros.map(pro => `<li>${pro}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h5>⚠️ Cons:</h5>
+                                <ul>
+                                    ${result.recommendation.choice.cons.map(con => `<li>${con}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Show all APIs comparison
+            result.apis.forEach(api => {
+                html += `
+                    <div class="comparison-result">
+                        <h4>${api.name}</h4>
+                        <p class="score">Score: ${api.totalScore.toFixed(2)}/10</p>
+                        <p><strong>Status:</strong> ${api.health.available ? '✅ Available' : '❌ Unavailable'}</p>
+                        ${api.health.responseTime ? `<p><strong>Response Time:</strong> ${api.health.responseTime}ms</p>` : ''}
+                        <p><strong>Best For:</strong> ${api.bestFor.join(', ')}</p>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function displayCloudResults(result) {
+            const container = document.getElementById('cloud-results');
+            let html = '<h3>☁️ Cloud Service Comparison Results</h3>';
+            
+            if (result.recommendation.choice) {
+                html += `
+                    <div class="comparison-result">
+                        <h4>🥇 Recommended: ${result.recommendation.choice.provider}</h4>
+                        <p class="score">Score: ${result.recommendation.choice.totalScore.toFixed(2)}/10</p>
+                        <p><strong>Monthly Cost:</strong> $${result.recommendation.choice.estimatedCost.monthly.toFixed(2)}</p>
+                        <p><strong>Reason:</strong> ${result.recommendation.reason}</p>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h5>✅ Strengths:</h5>
+                                <ul>
+                                    ${result.recommendation.choice.strengths.map(strength => `<li>${strength}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h5>⚠️ Considerations:</h5>
+                                <ul>
+                                    ${result.recommendation.choice.weaknesses.map(weakness => `<li>${weakness}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Cost Analysis
+            html += `
+                <div class="comparison-result">
+                    <h4>💰 Cost Analysis</h4>
+                    <p><strong>Cheapest:</strong> ${result.costAnalysis.cheapest} ($${result.costAnalysis.range.min.toFixed(2)}/month)</p>
+                    <p><strong>Most Expensive:</strong> ${result.costAnalysis.mostExpensive} ($${result.costAnalysis.range.max.toFixed(2)}/month)</p>
+                    <p><strong>Average Cost:</strong> $${result.costAnalysis.averageMonthlyCost.toFixed(2)}/month</p>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function displayTechStackResults(result) {
+            const container = document.getElementById('techstack-results');
+            let html = '<h3>🛠️ Tech Stack Recommendation</h3>';
+            
+            if (result.recommendation.choice) {
+                html += `
+                    <div class="comparison-result">
+                        <h4>🥇 Recommended: ${result.recommendation.choice.name}</h4>
+                        <p class="score">Score: ${result.recommendation.choice.totalScore.toFixed(2)}/10</p>
+                        <p><strong>Technologies:</strong> ${result.recommendation.choice.technologies.join(', ')}</p>
+                        <p><strong>Learning Curve:</strong> ${result.recommendation.choice.learningCurve}</p>
+                        <p><strong>Reason:</strong> ${result.recommendation.reason}</p>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h5>✅ Pros:</h5>
+                                <ul>
+                                    ${result.recommendation.choice.pros.map(pro => `<li>${pro}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h5>⚠️ Cons:</h5>
+                                <ul>
+                                    ${result.recommendation.choice.cons.map(con => `<li>${con}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        <p><strong>Best For:</strong> ${result.recommendation.choice.bestFor.join(', ')}</p>
+                    </div>
+                `;
+            }
+
+            // Implementation Plan
+            if (result.implementationPlan) {
+                html += `
+                    <div class="comparison-result">
+                        <h4>📋 Implementation Plan</h4>
+                        <p><strong>Total Estimate:</strong> ${result.implementationPlan.totalEstimate}</p>
+                        <p><strong>Team Size:</strong> ${result.implementationPlan.teamSize}</p>
+                        <h5>Phases:</h5>
+                        <ul>
+                            ${result.implementationPlan.phases.map(phase => 
+                                `<li><strong>Phase ${phase.phase}:</strong> ${phase.name} (${phase.duration})</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayError(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <div class="comparison-result" style="border-left-color: var(--danger-color); background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);">
+                    <h4>❌ Analysis Error</h4>
+                    <p style="color: var(--danger-color); font-weight: 500; margin: 15px 0;">
+                        Failed to perform comparison: ${message}
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <h5 style="color: var(--text-primary); margin-bottom: 10px;">💡 Troubleshooting Tips:</h5>
+                        <ul style="color: var(--text-secondary); line-height: 1.6;">
+                            <li>Check that all API endpoints are accessible and valid</li>
+                            <li>Ensure your internet connection is stable</li>
+                            <li>Verify that the server is running properly</li>
+                            <li>Try refreshing the page and attempting again</li>
+                        </ul>
+                    </div>
+                    <button class="btn" onclick="location.reload()" style="margin-top: 15px; font-size: 0.9rem; padding: 10px 20px;">
+                        🔄 Refresh Page
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

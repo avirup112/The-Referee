@@ -1,0 +1,23 @@
+{
+  "name": "the-referee",
+  "version": "1.0.0",
+  "description": "A smart comparison tool for making informed technical decisions",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "test": "node src/test.js"
+  },
+  "keywords": ["comparison", "decision-making", "api", "cloud", "tech-stack"],
+  "author": "AI for Bharat Participant",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
