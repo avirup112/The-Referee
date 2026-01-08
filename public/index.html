@@ -770,16 +770,32 @@
                 }
             ];
 
+            console.log('Sending API comparison request:', { apis });
+
             try {
                 const response = await fetch('/api/compare/apis', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({ apis })
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
                 const result = await response.json();
+                console.log('API comparison result:', result);
                 displayAPIResults(result);
             } catch (error) {
+                console.error('API comparison error:', error);
                 displayError('api-results', error.message);
             }
         }

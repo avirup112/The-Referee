@@ -7,16 +7,28 @@ const port = process.env.PORT || 3000;
 const referee = new Referee();
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://the-referee.vercel.app', 'https://the-referee-git-main-avirup12.vercel.app']
+    : ['http://localhost:3000'],
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
 
 // Routes
 app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: 'public' });
+});
+
+// API status endpoint
+app.get('/api', (req, res) => {
   res.json({
     name: 'The Referee API',
     version: '1.0.0',
     description: 'Smart comparison tool for technical decisions',
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
     endpoints: {
       '/api/compare/apis': 'Compare API options',
       '/api/compare/cloud': 'Compare cloud services',
@@ -26,23 +38,48 @@ app.get('/', (req, res) => {
   });
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // API Comparison
 app.post('/api/compare/apis', async (req, res) => {
   try {
+    console.log('API Compare request received:', req.body);
+    
     const { apis, options } = req.body;
     
     if (!apis || !Array.isArray(apis) || apis.length < 2) {
       return res.status(400).json({
-        error: 'Please provide at least 2 APIs to compare'
+        error: 'Please provide at least 2 APIs to compare',
+        received: apis
       });
     }
 
+    // Validate API objects
+    for (const api of apis) {
+      if (!api.name || !api.endpoint) {
+        return res.status(400).json({
+          error: 'Each API must have a name and endpoint',
+          received: api
+        });
+      }
+    }
+
     const result = await referee.compareAPIs(apis, options);
+    console.log('API Compare result generated successfully');
     res.json(result);
   } catch (error) {
+    console.error('API Compare error:', error);
     res.status(500).json({
       error: 'Failed to compare APIs',
-      message: error.message
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -209,16 +246,24 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    error: 'Endpoint not found',
-    availableEndpoints: [
-      'GET /',
-      'POST /api/compare/apis',
-      'POST /api/compare/cloud',
-      'POST /api/recommend/tech-stack',
-      'POST /api/compare/general'
-    ]
-  });
+  // If it's an API request, return JSON error
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({
+      error: 'API endpoint not found',
+      path: req.path,
+      availableEndpoints: [
+        'GET /api',
+        'GET /api/health',
+        'POST /api/compare/apis',
+        'POST /api/compare/cloud',
+        'POST /api/recommend/tech-stack',
+        'POST /api/compare/general'
+      ]
+    });
+  } else {
+    // For non-API requests, serve the HTML file (SPA fallback)
+    res.sendFile('index.html', { root: 'public' });
+  }
 });
 
 app.listen(port, () => {

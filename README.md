@@ -253,21 +253,41 @@ this.defaultCriteria = [
 
 ## 🚀 Deployment
 
-### Docker Deployment
-```bash
-# Build Docker image
-docker build -t the-referee .
+### Deploy to Vercel
 
-# Run container
-docker run -p 3000:3000 the-referee
+The Referee is a **Node.js full-stack application** with integrated frontend and backend:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/the-referee)
+
+### Manual Deployment
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy (select "Other" or "Node.js" as framework)
+vercel --prod
 ```
 
-### Cloud Deployment
-The application is ready for deployment on:
-- AWS (EC2, ECS, Lambda)
-- Azure (App Service, Container Instances)
-- Google Cloud (Cloud Run, App Engine)
-- Heroku, Vercel, Netlify
+### Important: Framework Selection
+When Vercel asks for framework preset:
+- ✅ **Select**: `Other` or `Node.js`
+- ❌ **Don't select**: React, Next.js, Vue, etc.
+- **Reason**: We use Express.js server that serves both HTML frontend and API
+
+### Local Development
+```bash
+npm install
+npm run dev
+# Visit http://localhost:3000 for both frontend UI and API
+```
+
+**Live Demo**: [https://the-referee.vercel.app](https://the-referee.vercel.app)
+
+📖 **See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for detailed deployment instructions**
 
 ## 🤝 Contributing
 

@@ -2,14 +2,21 @@
   "name": "the-referee",
   "version": "1.0.0",
   "description": "A smart comparison tool for making informed technical decisions",
-  "main": "src/index.js",
+  "main": "src/server.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js",
-    "test": "node src/test.js"
+    "test": "node src/test.js",
+    "build": "echo 'No build step required'",
+    "vercel-build": "echo 'Build completed'",
+    "postinstall": "echo 'Installation completed'"
   },
-  "keywords": ["comparison", "decision-making", "api", "cloud", "tech-stack"],
+  "keywords": ["comparison", "decision-making", "api", "cloud", "tech-stack", "ai-for-bharat"],
   "author": "AI for Bharat Participant",
   "license": "MIT",
   "dependencies": {
@@ -19,5 +26,13 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/the-referee.git"
+  },
+  "homepage": "https://github.com/your-username/the-referee#readme",
+  "bugs": {
+    "url": "https://github.com/your-username/the-referee/issues"
   }
 }
